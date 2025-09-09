@@ -1,0 +1,40 @@
+{
+  "name": "ui",
+  "version": "1.0.0",
+  "description": "UI components and contexts for hotel management system",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.15.0",
+  "dependencies": {
+    "@hookform/resolvers": "^5.2.1",
+    "@mantine/core": "^8.3.0",
+    "@mantine/hooks": "^8.3.0",
+    "@mantine/notifications": "^8.3.0",
+    "@supabase/supabase-js": "^2.57.2",
+    "@tabler/icons-react": "^3.14.0",
+    "api": "workspace:*",
+    "db": "workspace:*",
+    "react-hook-form": "^7.62.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.4",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "react": "19.1.0",
+    "typescript": "^5.6.2"
+  },
+  "peerDependencies": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  }
+}
