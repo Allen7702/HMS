@@ -23,11 +23,12 @@ const loginSchema = z.object({
     .min(1, 'Email or username is required')
     .refine(
       (value) => {
-        // Check if it's a valid email OR a username (at least 3 characters)
+        // Check if it's a valid email OR a username (at least 2 characters, alphanumeric + underscore)
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(value) || value.length >= 3;
+        const usernameRegex = /^[a-zA-Z0-9_]{2,}$/;
+        return emailRegex.test(value) || usernameRegex.test(value);
       },
-      'Please enter a valid email or username (min 3 characters)'
+      'Please enter a valid email address or username (2+ characters, letters, numbers, and underscores only)'
     ),
   password: z
     .string()
@@ -94,14 +95,17 @@ export function LoginPage({ redirectTo, showWelcomeMessage = false }: LoginPageP
       let errorTitle = 'Login Failed';
       let errorMessage = 'An error occurred during login. Please try again.';
 
-      if (err.message?.includes('Invalid login credentials')) {
-        errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+      if (err.message?.includes('Invalid login credentials') || err.message?.includes('Invalid username or password')) {
+        errorMessage = 'Invalid email/username or password. Please check your credentials and try again.';
       } else if (err.message?.includes('Email not confirmed')) {
         errorTitle = 'Email Not Confirmed';
         errorMessage = 'Please check your email and click the confirmation link before signing in.';
       } else if (err.message?.includes('Too many requests')) {
         errorTitle = 'Too Many Attempts';
         errorMessage = 'Too many login attempts. Please wait a moment before trying again.';
+      } else if (err.message?.includes('User data not found')) {
+        errorTitle = 'Account Not Found';
+        errorMessage = 'User account not found in our system. Please contact support.';
       } else if (err.message) {
         errorMessage = err.message;
       }

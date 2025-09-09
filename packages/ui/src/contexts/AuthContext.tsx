@@ -6,7 +6,7 @@ import { AuthState, SafeUser as User } from '../types';
 import { supabase } from 'api';
 
 interface AuthContextType extends AuthState {
-  login: (email: string, password: string) => Promise<void>;
+  login: (emailOrUsername: string, password: string) => Promise<void>;
   register: (email: string, password: string, userData: Partial<User>) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (user: Partial<User>) => void;
@@ -90,6 +90,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (error || !userData) {
         console.error('Error fetching user data:', error);
+        console.log('Supabase user email:', supabaseUser.email);
         return null;
       }
 
@@ -108,9 +109,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (emailOrUsername: string, password: string) => {
     dispatch({ type: 'LOGIN_START' });
     try {
+      let email = emailOrUsername;
+      
+      // Check if the input is a username (not an email)
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailOrUsername)) {
+        // It's a username, so we need to get the email from our users table
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('email')
+          .eq('username', emailOrUsername)
+          .single();
+
+        if (userError || !userData) {
+          console.error('Username lookup error:', userError);
+          throw new Error('Invalid username or password');
+        }
+        
+        email = userData.email;
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
