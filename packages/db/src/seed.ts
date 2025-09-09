@@ -1,6 +1,7 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import bcrypt from 'bcryptjs';
+import { createClient } from '@supabase/supabase-js';
 import { users } from './schema/users';
 import { roomTypes } from './schema/roomTypes';
 import { rooms } from './schema/rooms';
@@ -10,6 +11,17 @@ import { bookings } from './schema/bookings';
 // Database connection
 const sql = postgres('postgresql://postgres:postgres@127.0.0.1:54322/postgres');
 const db = drizzle(sql);
+
+// Supabase client for auth operations
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU';
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+});
 
 async function seedDatabase(): Promise<void> {
   try {
@@ -93,33 +105,73 @@ async function seedDatabase(): Promise<void> {
     console.log(`✅ Seeded ${insertedRooms.length} rooms (101-106, 201-206, 301-306, room 102 occupied)`);
 
     // Seed users (1 Admin, 1 Manager, 1 Staff)
-    console.log('� Seeding users...');
-    const usersData = [
+    console.log('👤 Seeding users...');
+    
+    const usersToCreate = [
       {
         fullName: 'Hotel Admin',
         username: 'admin',
         email: 'admin@hotelsunshine.com',
-        password: await bcrypt.hash('admin123', 10),
+        password: 'admin123',
         role: 'admin' as const,
       },
       {
         fullName: 'Hotel Manager',
         username: 'manager',
         email: 'manager@hotelsunshine.com',
-        password: await bcrypt.hash('manager123', 10),
+        password: 'manager123',
         role: 'manager' as const,
       },
       {
         fullName: 'Front Desk Staff',
         username: 'staff',
         email: 'staff@hotelsunshine.com',
-        password: await bcrypt.hash('staff123', 10),
+        password: 'staff123',
         role: 'staff' as const,
       },
     ];
+
+    const insertedUsers = [];
     
-    const insertedUsers = await db.insert(users).values(usersData).returning();
-    console.log(`✅ Seeded ${insertedUsers.length} users`);
+    for (const userData of usersToCreate) {
+      try {
+        // 1. Create user in Supabase Auth
+        console.log(`  Creating ${userData.role} user in Supabase Auth: ${userData.email}`);
+        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+          email: userData.email,
+          password: userData.password,
+          email_confirm: true
+        });
+
+        if (authError) {
+          console.warn(`  ⚠️ Supabase auth user might already exist: ${authError.message}`);
+        } else {
+          console.log(`  ✅ Created auth user: ${userData.email}`);
+        }
+
+        // 2. Create user record in our users table
+        console.log(`  Creating user record in database: ${userData.username}`);
+        const [dbUser] = await db.insert(users).values({
+          fullName: userData.fullName,
+          username: userData.username,
+          email: userData.email,
+          password: 'managed_by_supabase', // Placeholder since Supabase handles auth
+          role: userData.role,
+        }).returning();
+
+        insertedUsers.push(dbUser);
+        console.log(`  ✅ Created database user: ${userData.username}`);
+        
+      } catch (error: any) {
+        if (error.code === '23505') {
+          console.log(`  ⚠️ User ${userData.username} already exists in database, skipping...`);
+        } else {
+          console.error(`  ❌ Error creating user ${userData.username}:`, error.message);
+        }
+      }
+    }
+    
+    console.log(`✅ Seeded ${insertedUsers.length} users (with Supabase auth)`);
 
     // Seed guests
     console.log('👥 Seeding guests...');
@@ -225,13 +277,13 @@ async function seedDatabase(): Promise<void> {
     console.log('\n📊 Seeding Summary:');
     console.log(`- Room Types: ${roomTypeRes.length} (Small & Standard)`);
     console.log(`- Rooms: ${insertedRooms.length} (room 102 occupied)`);
-    console.log(`- Users: ${insertedUsers.length} (admin/manager123, staff123 passwords)`);
+    console.log(`- Users: ${insertedUsers.length} (created in both Supabase Auth and database)`);
     console.log(`- Guests: ${insertedGuests.length}`);
     console.log(`- Bookings: ${insertedBookings.length}`);
-    console.log('\nUser Credentials:');
-    console.log('- admin@hotelsunshine.com / admin123');
-    console.log('- manager@hotelsunshine.com / manager123');
-    console.log('- staff@hotelsunshine.com / staff123');
+    console.log('\nLogin Credentials (Email or Username):');
+    console.log('- admin@hotelsunshine.com or "admin" / admin123');
+    console.log('- manager@hotelsunshine.com or "manager" / manager123');
+    console.log('- staff@hotelsunshine.com or "staff" / staff123');
     console.log('\nRoom Layout:');
     console.log('- Small rooms (x01): $80/night - 101, 201, 301');
     console.log('- Standard rooms: $100/night - All others');
