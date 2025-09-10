@@ -126,10 +126,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
       message,
       color: colors[type],
       autoClose: type === 'error' ? false : 5000,
-    });
-
-    // Note: Not adding to internal state to avoid infinite loops
-    // Use addNotification separately if you need persistent notifications
+    }); 
   }, []);
 
   const value: NotificationContextType = {

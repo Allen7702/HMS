@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "../globals.css";
-import { Providers } from '../providers';
+import "./globals.css";
+import { ColorSchemeScript, mantineHtmlProps } from "@mantine/core";
+import { RootProvider } from "ui";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,20 +19,24 @@ export const metadata: Metadata = {
   description: "Hotel management system admin dashboard",
 };
 
-export default function RootLayout({
+export const dynamic = "force-dynamic";
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Providers>
+    <html lang="en" {...mantineHtmlProps}>
+      <head>
+        <ColorSchemeScript />
+      </head>
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <RootProvider>
           {children}
-        </Providers>
+        </RootProvider>
       </body>
     </html>
   );
 }
+

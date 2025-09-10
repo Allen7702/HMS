@@ -13,11 +13,9 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// Hotel management system theme
 const theme = createTheme({
   primaryColor: 'blue',
   colors: {
-    // Custom hotel brand colors
     brand: [
       '#e3f2fd',
       '#bbdefb',

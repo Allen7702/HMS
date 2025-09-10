@@ -1,3 +1,4 @@
+'use client';
 import { useEffect } from 'react';
 import { useHotel } from '../contexts/HotelContext';
 import { useNotifications } from '../contexts/NotificationContext';
