@@ -7,6 +7,7 @@ import { roomTypes } from './schema/roomTypes';
 import { rooms } from './schema/rooms';
 import { guests } from './schema/guests';
 import { bookings } from './schema/bookings';
+import { hotels } from './schema/hotels';
 
 // Database connection
 const sql = postgres('postgresql://postgres:postgres@127.0.0.1:54322/postgres');
@@ -30,8 +31,37 @@ async function seedDatabase(): Promise<void> {
 
     // Clear existing data (truncate all tables)
     console.log('🧹 Clearing existing data...');
-    await sql`TRUNCATE TABLE bookings, rooms, room_types, guests, users RESTART IDENTITY CASCADE;`;
+    await sql`TRUNCATE TABLE bookings, rooms, room_types, guests, users, hotels RESTART IDENTITY CASCADE;`;
     console.log('✅ All tables cleared');
+
+    // Seed hotel settings first
+    console.log('🏨 Seeding hotel settings...');
+    const hotelData = {
+      name: 'Hotel Sunshine',
+      address: '123 Paradise Beach Avenue, Miami, FL 33139, USA',
+      phone: '+1 (305) 555-0123',
+      email: 'info@hotelsunshine.com',
+      website: 'https://www.hotelsunshine.com',
+      description: 'A luxury beachfront hotel offering world-class amenities and exceptional service in the heart of Miami Beach.',
+      settings: {
+        currency: 'TZS',
+        timezone: 'Africa/Dar_es_Salaam',
+        checkInTime: '15:00',
+        checkOutTime: '11:00',
+        maxAdvanceBookingDays: 365,
+        cancellationPolicy: '24 hours before check-in for full refund',
+        taxRate: 18.0,
+        serviceChargeRate: 5.0,
+        allowOnlineBooking: true,
+        autoConfirmBookings: false,
+        requireDeposit: true,
+        depositPercentage: 50,
+      },
+      isActive: true,
+    };
+    
+    const insertedHotel = await db.insert(hotels).values(hotelData).returning();
+    console.log(`✅ Seeded hotel: ${insertedHotel[0].name}`);
 
     // Seed room_types
     console.log('🏠 Seeding room types...');
