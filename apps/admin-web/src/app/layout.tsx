@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ColorSchemeScript, mantineHtmlProps } from "@mantine/core";
 import { RootProvider } from "ui";
+import { ConditionalLayout } from "@/shared/components/ConditionalLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,9 +32,11 @@ export default async function RootLayout({
       <head>
         <ColorSchemeScript />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <RootProvider>
-          {children}
+          <ConditionalLayout>
+            {children}
+          </ConditionalLayout>
         </RootProvider>
       </body>
     </html>
