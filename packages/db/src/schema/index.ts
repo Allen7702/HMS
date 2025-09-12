@@ -10,6 +10,7 @@ import * as notificationsSchema from './notifications';
 import * as housekeepingsSchema from './housekeepings';
 import * as otaReservationsSchema from './otaReservations';
 import * as paymentsSchema from './payments';
+import * as hotelsSchema from './hotels';
 
 export const schema = {
     ...usersSchema,
@@ -24,4 +25,5 @@ export const schema = {
     ...housekeepingsSchema,
     ...otaReservationsSchema,
     ...paymentsSchema,
+    ...hotelsSchema,
 };
