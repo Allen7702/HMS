@@ -12,6 +12,7 @@ import { maintenances } from './schema/maintenances';
 import { notifications } from './schema/notifications';
 import { auditLogs } from './schema/auditLogs';
 import { otaReservations } from './schema/otaReservations';
+import { hotels } from './schema/hotels';
 
 // User schemas
 export const userSelectSchema = createSelectSchema(users);
@@ -59,12 +60,28 @@ export const auditLogSchema = createSelectSchema(auditLogs);
 // OTA Reservation schema
 export const otaReservationSchema = createSelectSchema(otaReservations);
 
+// Hotel schema with validation
+export const hotelSelectSchema = createSelectSchema(hotels);
+export const hotelInsertSchema = createInsertSchema(hotels, {
+  name: z.string().min(1, 'Hotel name is required'),
+  address: z.string().min(1, 'Address is required'),
+  email: z.string().email('Invalid email format').optional(),
+  phone: z.string().optional(),
+  website: z.string().url('Invalid website URL').optional(),
+});
+export const hotelUpdateSchema = hotelInsertSchema.partial().omit({ id: true, createdAt: true });
+
 // Export all schemas for easy import
 export const schemas = {
   // User (keep separate for different operations)
   userSelect: userSelectSchema,
   userInsert: userInsertSchema,
   userUpdate: userUpdateSchema,
+  
+  // Hotel (keep separate for different operations)
+  hotelSelect: hotelSelectSchema,
+  hotelInsert: hotelInsertSchema,
+  hotelUpdate: hotelUpdateSchema,
   
   // Single schemas for other entities
   guest: guestSchema,
@@ -84,6 +101,10 @@ export const schemas = {
 export type UserSelect = z.infer<typeof userSelectSchema>;
 export type UserInsert = z.infer<typeof userInsertSchema>;
 export type UserUpdate = z.infer<typeof userUpdateSchema>;
+
+export type HotelSelect = z.infer<typeof hotelSelectSchema>;
+export type HotelInsert = z.infer<typeof hotelInsertSchema>;
+export type HotelUpdate = z.infer<typeof hotelUpdateSchema>;
 
 export type Guest = z.infer<typeof guestSchema>;
 export type Room = z.infer<typeof roomSchema>;
