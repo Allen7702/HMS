@@ -96,8 +96,7 @@ export function LoginPage({ redirectTo, showWelcomeMessage = false }: LoginPageP
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-      <Container size={480} py={40}>
+      <Container size={480} py={40} >
         <Title ta="center" style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '2rem' }}>
           Welcome back!
         </Title>
@@ -138,6 +137,5 @@ export function LoginPage({ redirectTo, showWelcomeMessage = false }: LoginPageP
           © 2025 Hotel Management System. All rights reserved.
         </Text>
       </Container>
-    </div>
   );
 }
