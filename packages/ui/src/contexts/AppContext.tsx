@@ -2,10 +2,12 @@
 
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { AppSettings, Hotel } from '../types/app';
+import { HotelAPI, SupabaseError, ValidationError } from 'api';
 
 interface AppContextType extends AppSettings {
   updateHotelSettings: (settings: Partial<Hotel>) => Promise<void>;
   refreshSettings: () => Promise<void>;
+  createHotelSettings: (hotelData: Omit<Hotel, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -52,24 +54,25 @@ export function AppProvider({ children }: AppProviderProps) {
 
   const updateHotelSettings = async (settings: Partial<Hotel>) => {
     try {
-      // TODO: Replace with actual API call
-      const response = await fetch('/api/settings/hotel', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-        body: JSON.stringify(settings),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update hotel settings');
+      // Get the current hotel first
+      const currentHotel = await HotelAPI.getHotelSettings();
+      if (!currentHotel) {
+        throw new Error('Hotel not found');
       }
 
-      const updatedHotel = await response.json();
+      const updatedHotel = await HotelAPI.updateHotelSettings(currentHotel.id, settings);
       dispatch({ type: 'UPDATE_HOTEL', payload: updatedHotel });
     } catch (error) {
       console.error('Error updating hotel settings:', error);
+      
+      if (error instanceof ValidationError) {
+        throw new Error(`Validation failed: ${error.validationErrors.message}`);
+      }
+      
+      if (error instanceof SupabaseError) {
+        throw new Error(`Database error: ${error.message}`);
+      }
+      
       throw error;
     }
   };
@@ -77,22 +80,41 @@ export function AppProvider({ children }: AppProviderProps) {
   const refreshSettings = async () => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
-      // TODO: Replace with actual API call
-      const response = await fetch('/api/settings/hotel', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch hotel settings');
+      const hotel = await HotelAPI.getHotelSettings();
+      
+      if (hotel) {
+        dispatch({ type: 'SET_HOTEL', payload: hotel });
+      } else {
+        // No hotel settings found - this is expected for new installations
+        dispatch({ type: 'SET_LOADING', payload: false });
       }
-
-      const hotel = await response.json();
-      dispatch({ type: 'SET_HOTEL', payload: hotel });
     } catch (error) {
       console.error('Error fetching hotel settings:', error);
       dispatch({ type: 'SET_LOADING', payload: false });
+      
+      if (error instanceof SupabaseError) {
+        console.error('Database error:', error.message);
+      }
+      
+      throw error;
+    }
+  };
+
+  const createHotelSettings = async (hotelData: Omit<Hotel, 'id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      const newHotel = await HotelAPI.createHotel(hotelData);
+      dispatch({ type: 'SET_HOTEL', payload: newHotel });
+    } catch (error) {
+      console.error('Error creating hotel settings:', error);
+      
+      if (error instanceof ValidationError) {
+        throw new Error(`Validation failed: ${error.validationErrors.message}`);
+      }
+      
+      if (error instanceof SupabaseError) {
+        throw new Error(`Database error: ${error.message}`);
+      }
+      
       throw error;
     }
   };
@@ -115,6 +137,7 @@ export function AppProvider({ children }: AppProviderProps) {
     ...state,
     updateHotelSettings,
     refreshSettings,
+    createHotelSettings,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
