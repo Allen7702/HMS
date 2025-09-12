@@ -61,7 +61,7 @@ export const auditLogSchema = createSelectSchema(auditLogs);
 export const otaReservationSchema = createSelectSchema(otaReservations);
 
 // Hotel schema with validation
-export const hotelSelectSchema = createSelectSchema(hotels);
+export const hotelSchema = createSelectSchema(hotels);
 export const hotelInsertSchema = createInsertSchema(hotels, {
   name: z.string().min(1, 'Hotel name is required'),
   address: z.string().min(1, 'Address is required'),
@@ -77,12 +77,12 @@ export const schemas = {
   userSelect: userSelectSchema,
   userInsert: userInsertSchema,
   userUpdate: userUpdateSchema,
-  
+
   // Hotel (keep separate for different operations)
-  hotelSelect: hotelSelectSchema,
+  hotel: hotelSchema,
   hotelInsert: hotelInsertSchema,
   hotelUpdate: hotelUpdateSchema,
-  
+
   // Single schemas for other entities
   guest: guestSchema,
   room: roomSchema,
@@ -102,7 +102,7 @@ export type UserSelect = z.infer<typeof userSelectSchema>;
 export type UserInsert = z.infer<typeof userInsertSchema>;
 export type UserUpdate = z.infer<typeof userUpdateSchema>;
 
-export type HotelSelect = z.infer<typeof hotelSelectSchema>;
+export type Hotel = z.infer<typeof hotelSchema>;
 export type HotelInsert = z.infer<typeof hotelInsertSchema>;
 export type HotelUpdate = z.infer<typeof hotelUpdateSchema>;
 
