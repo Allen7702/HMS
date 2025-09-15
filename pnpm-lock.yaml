@@ -33,6 +33,9 @@ importers:
 
   apps/admin-web:
     dependencies:
+      '@hookform/resolvers':
+        specifier: ^5.2.1
+        version: 5.2.1(react-hook-form@7.62.0(react@19.1.0))
       '@mantine/carousel':
         specifier: ^8.3.1
         version: 8.3.1(@mantine/core@8.3.0(@mantine/hooks@8.3.0(react@19.1.0))(@types/react@19.1.12)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(@mantine/hooks@8.3.0(react@19.1.0))(embla-carousel-react@8.6.0(react@19.1.0))(embla-carousel@8.6.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -114,12 +117,18 @@ importers:
       react-dom:
         specifier: 19.1.0
         version: 19.1.0(react@19.1.0)
+      react-hook-form:
+        specifier: ^7.62.0
+        version: 7.62.0(react@19.1.0)
       recharts:
         specifier: ^3.2.0
         version: 3.2.0(@types/react@19.1.12)(react-dom@19.1.0(react@19.1.0))(react-is@16.13.1)(react@19.1.0)(redux@5.0.1)
       ui:
         specifier: workspace:*
         version: link:../../packages/ui
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3
@@ -271,6 +280,9 @@ importers:
       '@mantine/core':
         specifier: ^8.3.0
         version: 8.3.0(@mantine/hooks@8.3.0(react@19.1.0))(@types/react@19.1.12)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@mantine/dates':
+        specifier: ^8.3.1
+        version: 8.3.1(@mantine/core@8.3.0(@mantine/hooks@8.3.0(react@19.1.0))(@types/react@19.1.12)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(@mantine/hooks@8.3.0(react@19.1.0))(dayjs@1.11.18)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@mantine/hooks':
         specifier: ^8.3.0
         version: 8.3.0(react@19.1.0)
@@ -286,6 +298,9 @@ importers:
       api:
         specifier: workspace:*
         version: link:../api
+      dayjs:
+        specifier: ^1.11.18
+        version: 1.11.18
       db:
         specifier: workspace:*
         version: link:../db
