@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.1",
     "@mantine/carousel": "^8.3.1",
     "@mantine/charts": "^8.3.1",
     "@mantine/code-highlight": "^8.3.1",
@@ -36,8 +37,10 @@
     "next": "15.5.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "react-hook-form": "^7.62.0",
     "recharts": "^3.2.0",
-    "ui": "workspace:*"
+    "ui": "workspace:*",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
