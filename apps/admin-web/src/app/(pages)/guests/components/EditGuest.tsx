@@ -4,16 +4,16 @@ import React from 'react';
 import { GuestForm, type GuestFormData, titleOptions, nationalityOptions } from './GuestForm';
 import type { Guest } from "db";
 
-interface EditGuestFormProps {
+interface EditGuestProps {
     guest: Guest;
     onSubmit: (data: GuestFormData) => Promise<void>;
     onCancel: () => void;
     isLoading?: boolean;
 }
 
-export type EditGuestFormData = GuestFormData;
+export type EditGuestData = GuestFormData;
 
-export function EditGuestForm({ guest, onSubmit, onCancel, isLoading = false }: EditGuestFormProps) {
+export function EditGuest({ guest, onSubmit, onCancel, isLoading = false }: EditGuestProps) {
     const parseGuestName = (fullName: string) => {
         const parts = fullName.trim().split(' ');
         if (parts.length >= 2) {

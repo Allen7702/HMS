@@ -15,8 +15,8 @@ import {
   IconSearch,
   IconPlus,
 } from "@tabler/icons-react";
-import { NewGuestForm } from "./components/NewGuestForm";
-import { EditGuestForm } from "./components/EditGuestForm";
+import { AddGuest } from "./components/AddGuest";
+import { EditGuest } from "./components/EditGuest";
 import { GuestProfile } from "./components/GuestProfile";
 import { GuestStats } from "./components/GuestStats";
 import { GuestTabs } from "./components/GuestTabs";
@@ -25,7 +25,7 @@ import { useGuestManagement } from "./hooks/useGuestManagement";
 import { GUEST_STATUS_FILTERS, DEFAULT_PAGE_SIZE } from "./constants";
 import { SideDrawer } from "ui";
 
- export default function GuestsPage() {
+export default function GuestsPage() {
   const {
     searchValue,
     filterStatus,
@@ -41,7 +41,7 @@ import { SideDrawer } from "ui";
     currentGuests,
     arrivingGuests,
     departingGuests,
-    
+
     setDrawerOpen,
     setEditDrawerOpen,
     setProfileDrawerOpen,
@@ -51,7 +51,7 @@ import { SideDrawer } from "ui";
     setBookingHistoryGuest,
     setCurrentPage,
     setFilterStatus,
-    
+
     handleNewGuest,
     handleEditGuest,
     handleEditClick,
@@ -60,7 +60,7 @@ import { SideDrawer } from "ui";
     handleEditFromProfile,
     handleDelete,
     handleSearch,
-    
+
     bookings,
     isLoading,
     displayGuests,
@@ -110,7 +110,7 @@ import { SideDrawer } from "ui";
             value={filterStatus}
             onChange={(value) => {
               setFilterStatus(value);
-              setCurrentPage(1); 
+              setCurrentPage(1);
             }}
             clearable
           />
@@ -140,7 +140,7 @@ import { SideDrawer } from "ui";
         onClose={() => setDrawerOpen(false)}
         title="Add New Guests"
       >
-        <NewGuestForm
+        <AddGuest
           onSubmit={handleNewGuest}
           onCancel={() => setDrawerOpen(false)}
         />
@@ -155,7 +155,7 @@ import { SideDrawer } from "ui";
         title="Edit Guest Details"
       >
         {editingGuest && (
-          <EditGuestForm
+          <EditGuest
             guest={editingGuest}
             onSubmit={handleEditGuest}
             onCancel={() => {
@@ -197,7 +197,7 @@ import { SideDrawer } from "ui";
           setBookingHistoryDrawerOpen(false);
           setBookingHistoryGuest(null);
         }}
-        title={`Booking History - ${bookingHistoryGuest?.fullName || 'Guest'}`}
+        title={`Booking History for ${bookingHistoryGuest?.fullName || 'Guest'}`}
         size="xl"
       >
         {bookingHistoryGuest && (
@@ -207,7 +207,6 @@ import { SideDrawer } from "ui";
               return guestId === bookingHistoryGuest.id;
             })}
             guestId={bookingHistoryGuest.id}
-            title={`Booking History for ${bookingHistoryGuest.fullName}`}
             showGuestColumn={false}
           />
         )}
