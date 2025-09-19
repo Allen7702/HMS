@@ -17,11 +17,13 @@
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
     "@mantine/core": "^8.3.0",
+    "@mantine/dates": "^8.3.1",
     "@mantine/hooks": "^8.3.0",
     "@mantine/notifications": "^8.3.0",
     "@supabase/supabase-js": "^2.57.2",
     "@tabler/icons-react": "^3.14.0",
     "api": "workspace:*",
+    "dayjs": "^1.11.18",
     "db": "workspace:*",
     "next": "15.5.2",
     "react-hook-form": "^7.62.0",
