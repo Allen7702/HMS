@@ -45,8 +45,14 @@ export const paymentSchema = createSelectSchema(payments);
 // Invoice schema
 export const invoiceSchema = createSelectSchema(invoices);
 
-// Housekeeping schema
+// Housekeeping schema with validation
 export const housekeepingSchema = createSelectSchema(housekeepings);
+export const housekeepingInsertSchema = createInsertSchema(housekeepings, {
+  status: z.enum(['Pending', 'In Progress', 'Completed']),
+  notes: z.string().max(500, 'Notes cannot exceed 500 characters').optional(),
+  scheduledDate: z.string().datetime().optional(),
+});
+export const housekeepingUpdateSchema = housekeepingInsertSchema.partial().omit({ id: true, createdAt: true });
 
 // Maintenance schema
 export const maintenanceSchema = createSelectSchema(maintenances);
@@ -83,6 +89,11 @@ export const schemas = {
   hotelInsert: hotelInsertSchema,
   hotelUpdate: hotelUpdateSchema,
 
+  // Housekeeping (keep separate for different operations)
+  housekeeping: housekeepingSchema,
+  housekeepingInsert: housekeepingInsertSchema,
+  housekeepingUpdate: housekeepingUpdateSchema,
+
   // Single schemas for other entities
   guest: guestSchema,
   room: roomSchema,
@@ -90,7 +101,6 @@ export const schemas = {
   booking: bookingSchema,
   payment: paymentSchema,
   invoice: invoiceSchema,
-  housekeeping: housekeepingSchema,
   maintenance: maintenanceSchema,
   notification: notificationSchema,
   auditLog: auditLogSchema,
@@ -106,13 +116,16 @@ export type Hotel = z.infer<typeof hotelSchema>;
 export type HotelInsert = z.infer<typeof hotelInsertSchema>;
 export type HotelUpdate = z.infer<typeof hotelUpdateSchema>;
 
+export type Housekeeping = z.infer<typeof housekeepingSchema>;
+export type HousekeepingInsert = z.infer<typeof housekeepingInsertSchema>;
+export type HousekeepingUpdate = z.infer<typeof housekeepingUpdateSchema>;
+
 export type Guest = z.infer<typeof guestSchema>;
 export type Room = z.infer<typeof roomSchema>;
 export type RoomType = z.infer<typeof roomTypeSchema>;
 export type Booking = z.infer<typeof bookingSchema>;
 export type Payment = z.infer<typeof paymentSchema>;
 export type Invoice = z.infer<typeof invoiceSchema>;
-export type Housekeeping = z.infer<typeof housekeepingSchema>;
 export type Maintenance = z.infer<typeof maintenanceSchema>;
 export type Notification = z.infer<typeof notificationSchema>;
 export type AuditLog = z.infer<typeof auditLogSchema>;
