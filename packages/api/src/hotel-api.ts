@@ -1,68 +1,13 @@
 import { SupabaseAPI, ValidationError, SupabaseError } from './supabase-api';
-import { z } from 'zod';
+import {
+  Hotel,
+  HotelInsert,
+  HotelUpdate,
+  hotelSchema
+} from 'db';
 
-// Hotel types (will be imported from db package once built)
-interface HotelSettings {
-  currency: string;
-  timezone: string;
-  checkInTime: string;
-  checkOutTime: string;
-  maxAdvanceBookingDays: number;
-  cancellationPolicy: string;
-  taxRate: number;
-  serviceChargeRate: number;
-  allowOnlineBooking: boolean;
-  autoConfirmBookings: boolean;
-  requireDeposit: boolean;
-  depositPercentage: number;
-}
-
-export interface Hotel {
-  id: number;
-  name: string;
-  address: string;
-  phone?: string | null;
-  email?: string | null;
-  website?: string | null;
-  description?: string | null;
-  settings: HotelSettings;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export type HotelInsert = Omit<Hotel, 'id' | 'createdAt' | 'updatedAt'>;
-export type HotelUpdate = Partial<HotelInsert>;
-
-// Basic validation schemas
-const hotelSettingsSchema = z.object({
-  currency: z.string(),
-  timezone: z.string(),
-  checkInTime: z.string(),
-  checkOutTime: z.string(),
-  maxAdvanceBookingDays: z.number(),
-  cancellationPolicy: z.string(),
-  taxRate: z.number(),
-  serviceChargeRate: z.number(),
-  allowOnlineBooking: z.boolean(),
-  autoConfirmBookings: z.boolean(),
-  requireDeposit: z.boolean(),
-  depositPercentage: z.number(),
-});
-
-const hotelSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  address: z.string(),
-  phone: z.string().nullable().optional(),
-  email: z.string().nullable().optional(),
-  website: z.string().nullable().optional(),
-  description: z.string().nullable().optional(),
-  settings: hotelSettingsSchema,
-  isActive: z.boolean(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
-});
+// Extract the settings type from the Hotel type
+type HotelSettings = Hotel['settings'];
 
 export class HotelAPI {
   private static readonly TABLE = 'hotels';
@@ -72,14 +17,30 @@ export class HotelAPI {
    */
   static async getHotelSettings(): Promise<Hotel | null> {
     try {
-      const hotels = await SupabaseAPI.get<Hotel>(this.TABLE, {
-        schema: hotelSchema,
+      const rawHotels = await SupabaseAPI.get<any>(this.TABLE, {
         filters: { is_active: true },
         limit: 1,
         orderBy: { column: 'created_at', ascending: false }
       });
 
-      return hotels.length > 0 ? hotels[0] : null;
+      if (rawHotels.length === 0) return null;
+
+      const rawHotel = rawHotels[0];
+
+      // Map database columns to TypeScript field names
+      return {
+        id: rawHotel.id,
+        name: rawHotel.name,
+        address: rawHotel.address,
+        phone: rawHotel.phone,
+        email: rawHotel.email,
+        website: rawHotel.website,
+        description: rawHotel.description,
+        settings: rawHotel.settings,
+        isActive: rawHotel.is_active,
+        createdAt: rawHotel.created_at,
+        updatedAt: rawHotel.updated_at,
+      };
     } catch (error) {
       throw new SupabaseError('Failed to fetch hotel settings', error);
     }
@@ -143,8 +104,8 @@ export class HotelAPI {
    */
   static async deactivateHotel(id: number): Promise<Hotel> {
     try {
-      return await SupabaseAPI.update<Hotel>(this.TABLE, id, { 
-        isActive: false 
+      return await SupabaseAPI.update<Hotel>(this.TABLE, id, {
+        isActive: false
       }, {
         schema: hotelSchema
       });
@@ -157,8 +118,8 @@ export class HotelAPI {
    * Update specific hotel settings (partial update)
    */
   static async updateSettings(
-    id: number, 
-    settings: Partial<Hotel['settings']>
+    id: number,
+    settings: Partial<HotelSettings>
   ): Promise<Hotel> {
     try {
       // First get current hotel to merge settings
@@ -167,10 +128,9 @@ export class HotelAPI {
         throw new Error('Hotel not found');
       }
 
-      const updatedSettings = {
-        ...currentHotel.settings,
-        ...settings
-      };
+      // Ensure current settings is an object and merge safely
+      const currentSettings = (currentHotel.settings as HotelSettings) || {} as HotelSettings;
+      const updatedSettings: HotelSettings = Object.assign({}, currentSettings, settings) as HotelSettings;
 
       return await this.updateHotelSettings(id, { settings: updatedSettings });
     } catch (error) {
