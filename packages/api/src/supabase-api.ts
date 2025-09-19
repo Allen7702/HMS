@@ -1,11 +1,18 @@
 import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 
-// Initialize Supabase client
+// Use environment variables or fallback to local development values
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Create a single client for API operations - no need for unique storage key since this should be the main client
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+  },
+});
 
 // Error handling utilities
 export class SupabaseError extends Error {
@@ -41,7 +48,32 @@ export class SupabaseAPI {
       if (filters) {
         Object.entries(filters).forEach(([key, value]) => {
           if (value !== undefined && value !== null) {
-            query = query.eq(key, value);
+            // Handle range queries (objects with gte, lte, etc.)
+            if (typeof value === 'object' && !Array.isArray(value)) {
+              if (value.gte !== undefined) {
+                query = query.gte(key, value.gte);
+              }
+              if (value.lte !== undefined) {
+                query = query.lte(key, value.lte);
+              }
+              if (value.gt !== undefined) {
+                query = query.gt(key, value.gt);
+              }
+              if (value.lt !== undefined) {
+                query = query.lt(key, value.lt);
+              }
+              if (value.eq !== undefined) {
+                query = query.eq(key, value.eq);
+              }
+            } 
+            // Handle array values for 'in' queries
+            else if (Array.isArray(value)) {
+              query = query.in(key, value);
+            }
+            // Handle simple equality
+            else {
+              query = query.eq(key, value);
+            }
           }
         });
       }
