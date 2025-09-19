@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNewHotel, showSuccessNotification, showErrorNotification } from 'ui';
+import { useHotel, showSuccessNotification, showErrorNotification } from 'ui';
 import type { Guest } from 'db';
 import { type GuestFormData } from '../components/GuestForm';
 import { categorizeGuests, filterGuestsByStatus } from '../utils/guestUtils';
@@ -17,7 +17,7 @@ export function useGuestManagement() {
         bookings,
         fetchBookings,
         isLoading
-    } = useNewHotel();
+    } = useHotel();
 
     const [searchValue, setSearchValue] = useState("");
     const [filterStatus, setFilterStatus] = useState<string | null>("all");
