@@ -39,11 +39,25 @@ export const roomTypeSchema = createSelectSchema(roomTypes);
 // Booking schema
 export const bookingSchema = createSelectSchema(bookings);
 
-// Payment schema
+// Payment schema with validation
 export const paymentSchema = createSelectSchema(payments);
+export const paymentInsertSchema = createInsertSchema(payments, {
+  amount: z.number().positive('Amount must be positive'),
+  status: z.enum(['Pending', 'Completed', 'Failed', 'Refunded']),
+  method: z.enum(['Credit Card', 'PayPal', 'Bank Transfer', 'Cash']).optional(),
+  transactionId: z.string().min(1, 'Transaction ID is required').optional(),
+});
+export const paymentUpdateSchema = paymentInsertSchema.partial().omit({ id: true, processedAt: true });
 
-// Invoice schema
+// Invoice schema with validation
 export const invoiceSchema = createSelectSchema(invoices);
+export const invoiceInsertSchema = createInsertSchema(invoices, {
+  amount: z.number().positive('Amount must be positive'),
+  tax: z.number().min(0, 'Tax cannot be negative'),
+  invoiceNumber: z.string().min(1, 'Invoice number is required').optional(),
+  status: z.enum(['Draft', 'Unpaid', 'Paid', 'Void']),
+});
+export const invoiceUpdateSchema = invoiceInsertSchema.partial().omit({ id: true, createdAt: true });
 
 // Housekeeping schema with validation
 export const housekeepingSchema = createSelectSchema(housekeepings);
@@ -54,8 +68,14 @@ export const housekeepingInsertSchema = createInsertSchema(housekeepings, {
 });
 export const housekeepingUpdateSchema = housekeepingInsertSchema.partial().omit({ id: true, createdAt: true });
 
-// Maintenance schema
+// Maintenance schema with validation
 export const maintenanceSchema = createSelectSchema(maintenances);
+export const maintenanceInsertSchema = createInsertSchema(maintenances, {
+  description: z.string().min(1, 'Description is required'),
+  status: z.enum(['Open', 'In Progress', 'Resolved']),
+  priority: z.enum(['Low', 'Medium', 'High']),
+});
+export const maintenanceUpdateSchema = maintenanceInsertSchema.partial().omit({ id: true, createdAt: true });
 
 // Notification schema
 export const notificationSchema = createSelectSchema(notifications);
@@ -94,14 +114,26 @@ export const schemas = {
   housekeepingInsert: housekeepingInsertSchema,
   housekeepingUpdate: housekeepingUpdateSchema,
 
+  // Maintenance (keep separate for different operations)
+  maintenance: maintenanceSchema,
+  maintenanceInsert: maintenanceInsertSchema,
+  maintenanceUpdate: maintenanceUpdateSchema,
+
+  // Payment (keep separate for different operations)
+  payment: paymentSchema,
+  paymentInsert: paymentInsertSchema,
+  paymentUpdate: paymentUpdateSchema,
+
+  // Invoice (keep separate for different operations)
+  invoice: invoiceSchema,
+  invoiceInsert: invoiceInsertSchema,
+  invoiceUpdate: invoiceUpdateSchema,
+
   // Single schemas for other entities
   guest: guestSchema,
   room: roomSchema,
   roomType: roomTypeSchema,
   booking: bookingSchema,
-  payment: paymentSchema,
-  invoice: invoiceSchema,
-  maintenance: maintenanceSchema,
   notification: notificationSchema,
   auditLog: auditLogSchema,
   otaReservation: otaReservationSchema,
@@ -120,13 +152,22 @@ export type Housekeeping = z.infer<typeof housekeepingSchema>;
 export type HousekeepingInsert = z.infer<typeof housekeepingInsertSchema>;
 export type HousekeepingUpdate = z.infer<typeof housekeepingUpdateSchema>;
 
+export type Maintenance = z.infer<typeof maintenanceSchema>;
+export type MaintenanceInsert = z.infer<typeof maintenanceInsertSchema>;
+export type MaintenanceUpdate = z.infer<typeof maintenanceUpdateSchema>;
+
 export type Guest = z.infer<typeof guestSchema>;
 export type Room = z.infer<typeof roomSchema>;
 export type RoomType = z.infer<typeof roomTypeSchema>;
-export type Booking = z.infer<typeof bookingSchema>;
 export type Payment = z.infer<typeof paymentSchema>;
+export type PaymentInsert = z.infer<typeof paymentInsertSchema>;
+export type PaymentUpdate = z.infer<typeof paymentUpdateSchema>;
+
 export type Invoice = z.infer<typeof invoiceSchema>;
-export type Maintenance = z.infer<typeof maintenanceSchema>;
+export type InvoiceInsert = z.infer<typeof invoiceInsertSchema>;
+export type InvoiceUpdate = z.infer<typeof invoiceUpdateSchema>;
+
+export type Booking = z.infer<typeof bookingSchema>;
 export type Notification = z.infer<typeof notificationSchema>;
 export type AuditLog = z.infer<typeof auditLogSchema>;
 export type OtaReservation = z.infer<typeof otaReservationSchema>;
